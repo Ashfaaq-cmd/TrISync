@@ -31,15 +31,14 @@ class _LevelAssesmentScreenState extends State<LevelAssesmentScreen> {
       'icon': Icons.flash_on,
     },
   ];
+
   void _selectLevel(String level) {
-    //setState re-draws the screen so the selected card gets highlighted
     setState(() {
       _selectedLevel = level;
     });
   }
 
   void _continue() {
-    //show error if nothing is selected
     if (_selectedLevel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -47,14 +46,10 @@ class _LevelAssesmentScreenState extends State<LevelAssesmentScreen> {
           backgroundColor: Colors.redAccent,
         ),
       );
-
       return;
     }
-
-    //save level to user profile
     final profile = Provider.of<UserProfile>(context, listen: false);
     profile.fitnessLevel = _selectedLevel!;
-    //move to goal screen
     Navigator.pushNamed(context, '/goal-selection');
   }
 
@@ -63,124 +58,136 @@ class _LevelAssesmentScreenState extends State<LevelAssesmentScreen> {
     final profile = Provider.of<UserProfile>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0077B6),
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              // Back button
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                padding: EdgeInsets.zero,
-              ),
-              const SizedBox(height: 32),
-              // Step indicator
-              const Text(
-                'Step 2 of 3',
-                style: TextStyle(fontSize: 14, color: Colors.white60),
-              ),
-              const SizedBox(height: 8),
-              // Title using name from profile
-              Text(
-                'Hi ${profile.name}!',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'What is your current fitness level?',
-                style: TextStyle(fontSize: 15, color: Colors.white70),
-              ),
-              const SizedBox(height: 32),
-              // Level options
-              ..._levels.map((item) {
-                final isSelected = _selectedLevel == item['level'];
-                return GestureDetector(
-                  onTap: () => _selectLevel(item['level']),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : Colors.white12,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected ? Colors.white : Colors.white30,
-                        width: 2,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 40),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Color(0xFF0077B6),
+                      ),
+                      padding: EdgeInsets.zero,
+                    ),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'Step 2 of 3',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Hi ${profile.name}!',
+                      style: const TextStyle(
+                        color: Color(0xFF023E8A),
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
+                    const SizedBox(height: 8),
+                    const Text(
+                      'What is your current fitness level?',
+                      style: TextStyle(fontSize: 15, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 32),
+                    ..._levels.map((item) {
+                      final isSelected = _selectedLevel == item['level'];
+                      return GestureDetector(
+                        onTap: () => _selectLevel(item['level']),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF0077B6)
-                                : Colors.white24,
-                            borderRadius: BorderRadius.circular(12),
+                                ? const Color(0xFF0077B6).withValues(alpha: 0.1)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected
+                                  ? const Color(0xFF0077B6)
+                                  : Colors.grey[300]!,
+                              width: 2,
+                            ),
                           ),
-                          child: Icon(
-                            item['icon'],
-                            color: isSelected ? Colors.white : Colors.white70,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
                             children: [
-                              Text(
-                                item['level'],
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
                                   color: isSelected
                                       ? const Color(0xFF0077B6)
-                                      : Colors.white,
+                                      : const Color(
+                                          0xFF0077B6,
+                                        ).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                item['description'],
-                                style: TextStyle(
-                                  fontSize: 14,
+                                child: Icon(
+                                  item['icon'],
                                   color: isSelected
-                                      ? Colors.black54
-                                      : Colors.white60,
+                                      ? Colors.white
+                                      : const Color(0xFF0077B6),
                                 ),
                               ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item['level'],
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: isSelected
+                                            ? const Color(0xFF0077B6)
+                                            : const Color(0xFF023E8A),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      item['description'],
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (isSelected)
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Color(0xFF0077B6),
+                                ),
                             ],
                           ),
                         ),
-                        //Checkmark when selected
-                        if (isSelected)
-                          const Icon(
-                            Icons.check_circle,
-                            color: Color(0xFF0077B6),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-              const Spacer(),
-              // Continue button
-              SizedBox(
+                      );
+                    }),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+              child: SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
                   onPressed: _continue,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF0077B6),
+                    backgroundColor: const Color(0xFF0077B6),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -191,9 +198,8 @@ class _LevelAssesmentScreenState extends State<LevelAssesmentScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

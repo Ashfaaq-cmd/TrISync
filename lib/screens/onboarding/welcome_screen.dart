@@ -6,51 +6,76 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0077B6),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Spacer(),
-              //logo
-              Image.asset('assets/images/logo-bg.png', width: 100, height: 100),
-              const SizedBox(height: 24),
-              //title
+              const Spacer(flex: 2),
+              // Logo
+              Image.asset(
+                'assets/images/logo-bg.png',
+                width: 88,
+                height: 88,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.image_not_supported),
+                  );
+                },
+              ),
+              const Spacer(flex: 1),
               const Text(
                 'Welcome to TriSync',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 30,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Color(0xFF023E8A),
                 ),
               ),
-              const SizedBox(height: 16),
-              //subtitle
+              const SizedBox(height: 10),
               const Text(
                 'Your personalized triathlon training companion',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  height: 1.5,
-                  color: Colors.white70,
-                ),
+                style: TextStyle(fontSize: 15, height: 1.5, color: Colors.grey),
               ),
-              const SizedBox(height: 48),
-              //3 icons in a row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _SportIcon(image: 'assets/images/swim-bg.png', label: 'Swim'),
-                  _SportIcon(image: 'assets/images/bike-bg.png', label: 'Bike'),
-                  _SportIcon(image: 'assets/images/run-bg.png', label: 'Run'),
-                ],
+              const Spacer(flex: 2),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final itemWidth = (constraints.maxWidth - 48) / 3;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _SportIcon(
+                        image: 'assets/images/swim-bg.png',
+                        label: 'Swim',
+                        width: itemWidth,
+                      ),
+                      _SportIcon(
+                        image: 'assets/images/cycle-bg.png',
+                        label: 'Bike',
+                        width: itemWidth,
+                      ),
+                      _SportIcon(
+                        image: 'assets/images/run-bg.png',
+                        label: 'Run',
+                        width: itemWidth,
+                      ),
+                    ],
+                  );
+                },
               ),
-              const Spacer(),
-              //get started button
+              const Spacer(flex: 2),
+              // Get Started button
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -59,8 +84,8 @@ class WelcomeScreen extends StatelessWidget {
                     Navigator.pushNamed(context, '/name-input');
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF0077B6),
+                    backgroundColor: const Color(0xFF0077B6),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -71,7 +96,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const Spacer(flex: 1),
             ],
           ),
         ),
@@ -83,23 +108,34 @@ class WelcomeScreen extends StatelessWidget {
 class _SportIcon extends StatelessWidget {
   final String image;
   final String label;
+  final double width;
 
-  const _SportIcon({required this.image, required this.label});
+  const _SportIcon({
+    required this.image,
+    required this.label,
+    required this.width,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
-          width: 72,
-          height: 72,
+          width: width,
+          height: width,
           decoration: BoxDecoration(
-            color: Colors.white24,
+            color: const Color(0xFF0077B6).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
             padding: const EdgeInsets.all(12),
-            child: Image.asset(image),
+            child: Image.asset(
+              image,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(Icons.image_not_supported, color: Colors.grey[400]);
+              },
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -107,7 +143,7 @@ class _SportIcon extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 14,
-            color: Colors.white,
+            color: Color(0xFF023E8A),
             fontWeight: FontWeight.w500,
           ),
         ),

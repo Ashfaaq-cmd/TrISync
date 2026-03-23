@@ -74,7 +74,7 @@ class _HomeDashboard extends StatelessWidget {
     final profile = Provider.of<UserProfile>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0077B6),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -85,25 +85,31 @@ class _HomeDashboard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Hello, ${profile.name}!',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF023E8A),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Hello, ${profile.name}!',
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF023E8A),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Ready to crush your next workout?',
-                        style: TextStyle(fontSize: 16, color: Colors.white70),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Ready to crush your next workout?',
+                          style: TextStyle(fontSize: 15, color: Colors.grey),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
-
+                  const SizedBox(width: 12),
                   CircleAvatar(
                     radius: 24,
                     backgroundColor: const Color(0xFF023E8A),
@@ -141,7 +147,6 @@ class _HomeDashboard extends StatelessWidget {
                       style: TextStyle(fontSize: 13, color: Colors.white70),
                     ),
                     const SizedBox(height: 8),
-
                     Text(
                       '${profile.raceGoal} Triathlon',
                       style: const TextStyle(
@@ -149,11 +154,10 @@ class _HomeDashboard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-
                     const SizedBox(height: 12),
-
-                    // LEVEL BADGE
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -172,104 +176,103 @@ class _HomeDashboard extends StatelessWidget {
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 24),
-
-                    const Text(
-                      'Quick Actions',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _QuickActionCard(
-                            icon: Icons.calendar_today,
-                            label: 'My Plan',
-                            color: const Color(0xFF0096C7),
-                            onTap: () {},
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _QuickActionCard(
-                            icon: Icons.add_circle,
-                            label: 'Log Workout',
-                            color: const Color(0xFF48CAE4),
-                            onTap: () {},
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _QuickActionCard(
-                            icon: Icons.bar_chart,
-                            label: 'Progress',
-                            color: const Color(0xFF023E8A),
-                            onTap: () {},
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _QuickActionCard(
-                            icon: Icons.emoji_events,
-                            label: 'Achievements',
-                            color: const Color(0xFF0077B6),
-                            onTap: () {},
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    const Text(
-                      'Disciplines',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: const [
-                        Expanded(
-                          child: _DisciplineCard(
-                            image: 'assets/images/swim-bg.png',
-                            label: 'Swimming',
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: _DisciplineCard(
-                            image: 'assets/images/bike-bg.png',
-                            label: 'Cycling',
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: _DisciplineCard(
-                            image: 'assets/images/run-bg.png',
-                            label: 'Running',
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
+
+              const SizedBox(height: 24),
+
+              // QUICK ACTIONS
+              const Text(
+                'Quick Actions',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF023E8A),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 2x2 grid of quick action cards
+              Row(
+                children: [
+                  Expanded(
+                    child: _QuickActionCard(
+                      icon: Icons.calendar_today,
+                      label: 'My Plan',
+                      color: const Color(0xFF0096C7),
+                      onTap: () {},
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _QuickActionCard(
+                      icon: Icons.add_circle,
+                      label: 'Log Workout',
+                      color: const Color(0xFF48CAE4),
+                      onTap: () {},
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _QuickActionCard(
+                      icon: Icons.bar_chart,
+                      label: 'Progress',
+                      color: const Color(0xFF023E8A),
+                      onTap: () {},
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _QuickActionCard(
+                      icon: Icons.emoji_events,
+                      label: 'Badges',
+                      color: const Color(0xFF0077B6),
+                      onTap: () {},
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // DISCIPLINES
+              const Text(
+                'Disciplines',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF023E8A),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: _DisciplineCard(
+                      image: 'assets/images/swim-bg.png',
+                      label: 'Swimming',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _DisciplineCard(
+                      image: 'assets/images/cycle-bg.png',
+                      label: 'Cycling',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _DisciplineCard(
+                      image: 'assets/images/run-bg.png',
+                      label: 'Running',
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -278,7 +281,7 @@ class _HomeDashboard extends StatelessWidget {
   }
 }
 
-//  QUICK ACTION
+// QUICK ACTION CARD — icon on top, label below
 
 class _QuickActionCard extends StatelessWidget {
   final IconData icon;
@@ -298,7 +301,7 @@ class _QuickActionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -310,25 +313,29 @@ class _QuickActionCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color),
+              child: Icon(icon, color: color, size: 22),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(height: 8),
             Text(
               label,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF023E8A),
               ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -337,7 +344,7 @@ class _QuickActionCard extends StatelessWidget {
   }
 }
 
-//  DISCIPLINE CARD
+// DISCIPLINE CARD
 
 class _DisciplineCard extends StatelessWidget {
   final String image;
@@ -348,7 +355,7 @@ class _DisciplineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -361,16 +368,40 @@ class _DisciplineCard extends StatelessWidget {
         ],
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(image, width: 40, height: 40),
+          Image.asset(
+            image,
+            width: 44,
+            height: 44,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.image_not_supported,
+                  color: Colors.grey,
+                  size: 20,
+                ),
+              );
+            },
+          ),
           const SizedBox(height: 8),
           Text(
             label,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: Color(0xFF023E8A),
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
           ),
         ],
       ),

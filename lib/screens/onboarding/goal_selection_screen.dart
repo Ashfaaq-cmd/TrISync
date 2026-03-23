@@ -10,8 +10,8 @@ class GoalSelectionScreen extends StatefulWidget {
 }
 
 class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
-  //Tracks the selected goal
   String? _selectedGoal;
+
   final List<Map<String, dynamic>> _goals = [
     {
       'goal': 'Sprint',
@@ -23,7 +23,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
     {
       'goal': 'Olympic',
       'distance': 'Standard distance (1500m swim, 40km bike, 10km run)',
-      'description': 'The classic triathlon distance ',
+      'description': 'The classic triathlon distance',
       'icon': Icons.emoji_events,
       'color': Colors.blueAccent,
     },
@@ -62,157 +62,169 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
     final profile = Provider.of<UserProfile>(context, listen: false);
     profile.saveProfile(
       name: profile.name,
-      email: '', // TODO: Add email input
+      email: '',
       fitnessLevel: profile.fitnessLevel,
       raceGoal: _selectedGoal!,
     );
-    //go to home screen and clear entire navigation stack so user can't go back to onboarding
     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0077B6),
+      backgroundColor: Colors.white,
+      // Use a Column with a scrollable middle section and a pinned button
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              // Back button
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                padding: EdgeInsets.zero,
-              ),
-              const SizedBox(height: 32),
-              // Step indicator
-              const Text(
-                'Step 3 of 3',
-                style: TextStyle(fontSize: 14, color: Colors.white60),
-              ),
-              const SizedBox(height: 8),
-              //Title
-              Text(
-                'What is your triathlon goal?',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'We will create a training plan based on your goal',
-                style: TextStyle(color: Colors.white70, fontSize: 16),
-              ),
-              const SizedBox(height: 24),
-              //Goal options
-              ..._goals.map((item) {
-                final isSelected = _selectedGoal == item['goal'];
-                return GestureDetector(
-                  onTap: () => _selectGoal(item['goal']),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : Colors.white12,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected ? Colors.white : Colors.white30,
-                        width: 2,
+        child: Column(
+          children: [
+            // Scrollable content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 40),
+                    // Back button
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Color(0xFF0077B6),
+                      ),
+                      padding: EdgeInsets.zero,
+                    ),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'Step 3 of 3',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'What is your triathlon goal?',
+                      style: TextStyle(
+                        color: Color(0xFF023E8A),
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
+                    const SizedBox(height: 8),
+                    const Text(
+                      'We will create a training plan based on your goal',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                    const SizedBox(height: 24),
+                    // Goal cards
+                    ..._goals.map((item) {
+                      final isSelected = _selectedGoal == item['goal'];
+                      return GestureDetector(
+                        onTap: () => _selectGoal(item['goal']),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: isSelected ? item['color'] : Colors.white24,
-                            borderRadius: BorderRadius.circular(12),
+                            color: isSelected
+                                ? item['color'].withValues(alpha: 0.1)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected
+                                  ? item['color']
+                                  : Colors.grey[300]!,
+                              width: 2,
+                            ),
                           ),
-                          child: Icon(
-                            item['icon'],
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
                             children: [
-                              //Goal name
-                              Text(
-                                item['goal'],
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
                                   color: isSelected
                                       ? item['color']
-                                      : Colors.white,
+                                      : item['color'].withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              //Distance
-                              Text(
-                                item['distance'],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                                child: Icon(
+                                  item['icon'],
                                   color: isSelected
-                                      ? Colors.black54
-                                      : Colors.white70,
+                                      ? Colors.white
+                                      : item['color'],
+                                  size: 26,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              //Description
-                              Text(
-                                item['description'],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: isSelected
-                                      ? Colors.black45
-                                      : Colors.white60,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item['goal'],
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                        color: isSelected
+                                            ? item['color']
+                                            : const Color(0xFF023E8A),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      item['distance'],
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      item['description'],
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
+                              if (isSelected)
+                                Icon(Icons.check_circle, color: item['color']),
                             ],
                           ),
                         ),
-                        if (isSelected)
-                          Icon(Icons.check_circle, color: item['color']),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-              const Spacer(),
-              //Finish button
-              SizedBox(
+                      );
+                    }),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ),
+
+            // Pinned finish button
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+              child: SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
                   onPressed: _finish,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF0077B6),
+                    backgroundColor: const Color(0xFF0077B6),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   child: const Text(
-                    'Let\'s Go!',
+                    "Let's Go!",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

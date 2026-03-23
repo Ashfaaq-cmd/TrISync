@@ -11,7 +11,7 @@ class NameInputScreen extends StatefulWidget {
 
 class _NameInputScreenState extends State<NameInputScreen> {
   final TextEditingController _nameController = TextEditingController();
-  final _formkey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -20,12 +20,9 @@ class _NameInputScreenState extends State<NameInputScreen> {
   }
 
   void _continue() {
-    // Validate form
-    if (_formkey.currentState!.validate()) {
-      // Save name to user profile
+    if (_formKey.currentState!.validate()) {
       final profile = Provider.of<UserProfile>(context, listen: false);
       profile.name = _nameController.text.trim();
-      // Navigate to next onboarding screen
       Navigator.pushNamed(context, '/level-assessment');
     }
   }
@@ -33,98 +30,117 @@ class _NameInputScreenState extends State<NameInputScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0077B6),
+      backgroundColor: Colors.white,
+      // resizeToAvoidBottomInset keeps the button visible when the keyboard opens
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              // Back button
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                padding: EdgeInsets.zero,
-              ),
-              const SizedBox(height: 32),
-              // Step indicator
-              const Text(
-                'Step 1 of 3',
-                style: TextStyle(fontSize: 14, color: Colors.white70),
-              ),
-              const SizedBox(height: 8),
-              // Title
-              const Text(
-                'What is your name?',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Subtitle
-              const Text(
-                'This will help us personalize your training experience.',
-                style: TextStyle(fontSize: 16, color: Colors.white70),
-              ),
-              const SizedBox(height: 40),
-              // Name input field
-              Form(
-                key: _formkey,
-                child: TextFormField(
-                  controller: _nameController,
-                  textCapitalization: TextCapitalization.words,
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
-                  decoration: InputDecoration(
-                    hintText: 'Enter your name',
-                    hintStyle: TextStyle(color: Colors.white38),
-                    prefixIcon: const Icon(
-                      Icons.person_outline,
-                      color: Colors.white70,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 40),
+                    // Back button
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Color(0xFF0077B6),
+                      ),
+                      padding: EdgeInsets.zero,
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Colors.white38),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'Step 1 of 3',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(
-                        color: Colors.white,
-                        width: 2,
+                    const SizedBox(height: 8),
+                    const Text(
+                      'What is your name?',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF023E8A),
                       ),
                     ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Colors.redAccent),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'This will help us personalize your training experience.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Colors.redAccent),
+                    const SizedBox(height: 40),
+                    // Name input field
+                    Form(
+                      key: _formKey,
+                      child: TextFormField(
+                        controller: _nameController,
+                        textCapitalization: TextCapitalization.words,
+                        style: const TextStyle(
+                          color: Color(0xFF023E8A),
+                          fontSize: 18,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Enter your name',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          prefixIcon: const Icon(
+                            Icons.person_outline,
+                            color: Color(0xFF0077B6),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF0077B6),
+                              width: 2,
+                            ),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          if (value.trim().length < 2) {
+                            return 'Name must be at least 2 characters';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your name';
-                    }
-                    if (value.trim().length < 2) {
-                      return 'Name must be at least 2 characters';
-                    }
-                    return null;
-                  },
+                    const SizedBox(height: 24),
+                  ],
                 ),
               ),
-              const Spacer(),
-              // Continue button
-              SizedBox(
+            ),
+
+            // Pinned continue button — stays above keyboard
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+              child: SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
                   onPressed: _continue,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF0077B6),
+                    backgroundColor: const Color(0xFF0077B6),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -135,9 +151,8 @@ class _NameInputScreenState extends State<NameInputScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
