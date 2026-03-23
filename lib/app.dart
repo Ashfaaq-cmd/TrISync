@@ -36,8 +36,6 @@ class TriSync extends StatelessWidget {
           '/goal-selection': (context) => const GoalSelectionScreen(),
           '/home': (context) => const HomeScreen(),
         },
-
-        home: const SplashScreen(),
       ),
     );
   }

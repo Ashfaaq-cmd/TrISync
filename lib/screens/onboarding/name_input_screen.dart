@@ -50,7 +50,7 @@ class _NameInputScreenState extends State<NameInputScreen> {
               const SizedBox(height: 32),
               // Step indicator
               const Text(
-                'Step 1 of 4',
+                'Step 1 of 3',
                 style: TextStyle(fontSize: 14, color: Colors.white70),
               ),
               const SizedBox(height: 8),
