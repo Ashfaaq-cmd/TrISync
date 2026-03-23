@@ -62,7 +62,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
     final profile = Provider.of<UserProfile>(context, listen: false);
     profile.saveProfile(
       name: profile.name,
-      email: '',
+      password: profile.password,
       fitnessLevel: profile.fitnessLevel,
       raceGoal: _selectedGoal!,
     );
