@@ -7,7 +7,7 @@ class UserProfile extends ChangeNotifier {
   String raceGoal = '';
   bool onboardingCompleted = false;
 
-  void saveProfie({
+  void saveProfile({
     required String name,
     required String email,
     required String fitnessLevel,

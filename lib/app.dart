@@ -4,6 +4,9 @@ import 'screens/splash_screen.dart';
 import 'models/user_profile.dart';
 import 'screens/onboarding/welcome_screen.dart';
 import 'screens/onboarding/name_input_screen.dart';
+import 'screens/onboarding/level_assesment_screen.dart';
+import 'screens/onboarding/goal_selection_screen.dart';
+import 'screens/home_screen.dart';
 
 class TriSync extends StatelessWidget {
   const TriSync({super.key});
@@ -29,6 +32,9 @@ class TriSync extends StatelessWidget {
           '/': (context) => const SplashScreen(),
           '/welcome': (context) => const WelcomeScreen(),
           '/name-input': (context) => const NameInputScreen(),
+          '/level-assessment': (context) => const LevelAssesmentScreen(),
+          '/goal-selection': (context) => const GoalSelectionScreen(),
+          '/home': (context) => const HomeScreen(),
         },
 
         home: const SplashScreen(),
