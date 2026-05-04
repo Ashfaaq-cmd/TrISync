@@ -58,18 +58,43 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
     }
 
     final profile = Provider.of<UserProfile>(context, listen: false);
-    await profile.saveProfile(
-      name: profile.name,
-      password: profile.password,
-      fitnessLevel: profile.fitnessLevel,
-      raceGoal: _selectedGoal!,
-    );
+    if (profile.name.isEmpty ||
+        profile.password.isEmpty ||
+        profile.fitnessLevel.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please complete the previous onboarding steps first'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
 
-    // Schedule daily 7 AM motivational reminder now that onboarding is done
-    await NotificationService.instance.scheduleDailyReminder(
-      hour: 7,
-      minute: 0,
-    );
+    try {
+      await profile.saveProfile(
+        name: profile.name,
+        password: profile.password,
+        fitnessLevel: profile.fitnessLevel,
+        raceGoal: _selectedGoal!,
+      );
+    } catch (error, stack) {
+      debugPrint('Error saving user profile: $error\n$stack');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Unable to save your goal. Please try again.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+      return;
+    }
+
+    try {
+      await NotificationService.instance.getDailyQuote();
+    } catch (error, stack) {
+      debugPrint('Error preloading daily quote: $error\n$stack');
+    }
 
     if (!mounted) return;
     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);

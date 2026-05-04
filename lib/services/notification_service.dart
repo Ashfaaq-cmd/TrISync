@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 
@@ -11,6 +12,9 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
+
+  static const _dailyQuoteTextKey = 'dailyQuoteText';
+  static const _dailyQuoteDateKey = 'dailyQuoteDate';
 
   bool _initialized = false;
 
@@ -73,6 +77,24 @@ class NotificationService {
     ];
     fallbacks.shuffle();
     return fallbacks.first;
+  }
+
+  Future<String> getDailyQuote() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedQuote = prefs.getString(_dailyQuoteTextKey);
+    final storedDate = prefs.getString(_dailyQuoteDateKey);
+
+    final today = DateTime.now();
+    final todayKey = '${today.year}-${today.month}-${today.day}';
+
+    if (storedQuote != null && storedDate == todayKey) {
+      return storedQuote;
+    }
+
+    final quote = await _fetchQuote();
+    await prefs.setString(_dailyQuoteTextKey, quote);
+    await prefs.setString(_dailyQuoteDateKey, todayKey);
+    return quote;
   }
 
   // ── Schedule daily notification at a given time

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/user_profile.dart';
 import '../models/workout.dart';
 import '../models/badge_model.dart';
+import '../services/notification_service.dart';
 import 'log_workout_screen.dart';
 import 'plan_screen.dart';
 import 'progress_screen.dart';
@@ -84,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ── Home Dashboard ────────────────────────────────────────
+//  Home Dashboard
 class _HomeDashboard extends StatelessWidget {
   final void Function(int) onNavigate;
   const _HomeDashboard({required this.onNavigate});
@@ -103,7 +104,7 @@ class _HomeDashboard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Header ──────────────────────────────────
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -149,7 +150,12 @@ class _HomeDashboard extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // ── Profile card ─────────────────────────────
+              // ── Motivate with a daily quote
+              const _DailyMotivationCard(),
+
+              const SizedBox(height: 20),
+
+              // ── Profile card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -191,7 +197,7 @@ class _HomeDashboard extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // ── This week summary ────────────────────────
+              // ── This week summary
               const Text(
                 'This Week',
                 style: TextStyle(
@@ -254,7 +260,7 @@ class _HomeDashboard extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // ── Quick actions ────────────────────────────
+              // ── Quick actions
               const Text(
                 'Quick Actions',
                 style: TextStyle(
@@ -347,6 +353,93 @@ class _HomeDashboard extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _DailyMotivationCard extends StatefulWidget {
+  const _DailyMotivationCard();
+
+  @override
+  State<_DailyMotivationCard> createState() => _DailyMotivationCardState();
+}
+
+class _DailyMotivationCardState extends State<_DailyMotivationCard> {
+  late Future<String> _quoteFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _quoteFuture = NotificationService.instance.getDailyQuote();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: _quoteFuture,
+      builder: (context, snapshot) {
+        final quote = snapshot.data;
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF48CAE4), Color(0xFF023E8A)],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: const [
+                  Icon(Icons.auto_awesome, color: Colors.white, size: 22),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Today’s Motivation',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              if (snapshot.connectionState == ConnectionState.waiting)
+                const SizedBox(
+                  height: 72,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  quote ??
+                      'Fuel your day with a strong swim, a smooth ride, and a fast run. The grind pays off.',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    height: 1.5,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 // ── Empty state when no workouts logged yet ───────────────
