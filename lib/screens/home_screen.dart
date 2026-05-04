@@ -376,7 +376,7 @@ class _GamificationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -391,7 +391,7 @@ class _GamificationCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF48CAE4).withOpacity(0.15),
+                  color: const Color(0xFF48CAE4).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(
@@ -467,10 +467,13 @@ class _DailyChallengeCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: challenge.color.withOpacity(0.3), width: 2),
+        border: Border.all(
+          color: challenge.color.withValues(alpha: 0.3),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -485,7 +488,7 @@ class _DailyChallengeCard extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: challenge.color.withOpacity(0.15),
+                  color: challenge.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(challenge.icon, color: challenge.color, size: 28),
@@ -519,7 +522,7 @@ class _DailyChallengeCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.15),
+                    color: Colors.green.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
