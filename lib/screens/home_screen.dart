@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user_profile.dart';
+import '../models/workout.dart';
+import '../models/badge_model.dart';
+import 'log_workout_screen.dart';
+import 'plan_screen.dart';
+import 'progress_screen.dart';
+import 'badges_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,23 +18,37 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const _HomeDashboard(),
-    const Placeholder(),
-    const Placeholder(),
-    const Placeholder(),
-    const Placeholder(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Capture providers before async gap to avoid BuildContext warnings
+    final workoutProvider = context.read<WorkoutProvider>();
+    final badgeProvider = context.read<BadgeProvider>();
+    Future.microtask(() {
+      workoutProvider.loadWorkouts();
+      badgeProvider.loadBadges();
+    });
+  }
+
+  void navigateTo(int index) => setState(() => _currentIndex = index);
 
   @override
   Widget build(BuildContext context) {
+    // IndexedStack keeps all screens alive so state is not lost when switching tabs
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          _HomeDashboard(onNavigate: navigateTo),
+          const PlanScreen(),
+          const LogWorkoutScreen(),
+          const ProgressScreen(),
+          const BadgesScreen(),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() => _currentIndex = index);
-        },
+        onTap: (index) => setState(() => _currentIndex = index),
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF0077B6),
         unselectedItemColor: Colors.grey,
@@ -54,8 +74,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Progress',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events_outlined),
-            activeIcon: Icon(Icons.emoji_events),
+            icon: Icon(Icons.workspace_premium_outlined),
+            activeIcon: Icon(Icons.workspace_premium),
             label: 'Badges',
           ),
         ],
@@ -64,24 +84,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// HOME DASHBOARD
-
+// ── Home Dashboard ────────────────────────────────────────
 class _HomeDashboard extends StatelessWidget {
-  const _HomeDashboard();
+  final void Function(int) onNavigate;
+  const _HomeDashboard({required this.onNavigate});
 
   @override
   Widget build(BuildContext context) {
-    final profile = Provider.of<UserProfile>(context);
+    final profile = context.watch<UserProfile>();
+    final workouts = context.watch<WorkoutProvider>();
+    final badges = context.watch<BadgeProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // HEADER
+              // ── Header ──────────────────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -102,9 +124,7 @@ class _HomeDashboard extends StatelessWidget {
                         const SizedBox(height: 4),
                         const Text(
                           'Ready to crush your next workout?',
-                          style: TextStyle(fontSize: 15, color: Colors.grey),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -116,7 +136,7 @@ class _HomeDashboard extends StatelessWidget {
                     child: Text(
                       profile.name.isNotEmpty
                           ? profile.name[0].toUpperCase()
-                          : '',
+                          : 'T',
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -127,9 +147,9 @@ class _HomeDashboard extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              // PROFILE CARD
+              // ── Profile card ─────────────────────────────
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -146,7 +166,7 @@ class _HomeDashboard extends StatelessWidget {
                       'Your Training Profile',
                       style: TextStyle(fontSize: 13, color: Colors.white70),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       '${profile.raceGoal} Triathlon',
                       style: const TextStyle(
@@ -154,123 +174,155 @@ class _HomeDashboard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        profile.fitnessLevel,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _chip(profile.fitnessLevel),
+                        const SizedBox(width: 8),
+                        _chip('${workouts.totalWorkouts} sessions'),
+                        const SizedBox(width: 8),
+                        _chip('${badges.earnedBadges.length} badges'),
+                      ],
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              // QUICK ACTIONS
+              // ── This week summary ────────────────────────
               const Text(
-                'Quick Actions',
+                'This Week',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF023E8A),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              Row(
+                children: Discipline.values.map((d) {
+                  final count = workouts.weeklyWorkouts
+                      .where((w) => w.discipline == d)
+                      .length;
+                  return Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(
+                        right: d != Discipline.run ? 10 : 0,
+                      ),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            d.icon,
+                            color: const Color(0xFF0077B6),
+                            size: 22,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '$count',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF023E8A),
+                            ),
+                          ),
+                          Text(
+                            d.label.split('').take(4).join(),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
 
-              // 2x2 grid of quick action cards
+              const SizedBox(height: 20),
+
+              // ── Quick actions ────────────────────────────
+              const Text(
+                'Quick Actions',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF023E8A),
+                ),
+              ),
+              const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(
-                    child: _QuickActionCard(
-                      icon: Icons.calendar_today,
-                      label: 'My Plan',
-                      color: const Color(0xFF0096C7),
-                      onTap: () {},
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
                     child: _QuickActionCard(
                       icon: Icons.add_circle,
                       label: 'Log Workout',
-                      color: const Color(0xFF48CAE4),
-                      onTap: () {},
+                      color: const Color(0xFF0096C7),
+                      onTap: () => onNavigate(2),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _QuickActionCard(
+                      icon: Icons.calendar_today,
+                      label: 'My Plan',
+                      color: const Color(0xFF023E8A),
+                      onTap: () => onNavigate(1),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: _QuickActionCard(
                       icon: Icons.bar_chart,
                       label: 'Progress',
-                      color: const Color(0xFF023E8A),
-                      onTap: () {},
+                      color: const Color(0xFF0077B6),
+                      onTap: () => onNavigate(3),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: _QuickActionCard(
-                      icon: Icons.emoji_events,
+                      icon: Icons.workspace_premium,
                       label: 'Badges',
-                      color: const Color(0xFF0077B6),
-                      onTap: () {},
+                      color: const Color(0xFF48CAE4),
+                      onTap: () => onNavigate(4),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              // DISCIPLINES
+              // ── Recent workouts ──────────────────────────
               const Text(
-                'Disciplines',
+                'Recent Workouts',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF023E8A),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: _DisciplineCard(
-                      image: 'assets/images/swim-bg.png',
-                      label: 'Swimming',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _DisciplineCard(
-                      image: 'assets/images/cycle-bg.png',
-                      label: 'Cycling',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _DisciplineCard(
-                      image: 'assets/images/run-bg.png',
-                      label: 'Running',
-                    ),
-                  ),
-                ],
-              ),
+              if (workouts.recentWorkouts.isEmpty)
+                _EmptyWorkouts(onTap: () => onNavigate(2))
+              else
+                ...workouts.recentWorkouts.map(
+                  (w) => _RecentWorkoutTile(workout: w),
+                ),
 
               const SizedBox(height: 16),
             ],
@@ -279,10 +331,130 @@ class _HomeDashboard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _chip(String label) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: BoxDecoration(
+      color: Colors.white24,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(
+      label,
+      style: const TextStyle(
+        fontSize: 12,
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
 }
 
-// QUICK ACTION CARD — icon on top, label below
+// ── Empty state when no workouts logged yet ───────────────
+class _EmptyWorkouts extends StatelessWidget {
+  final VoidCallback onTap;
+  const _EmptyWorkouts({required this.onTap});
 
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(28),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF0077B6).withValues(alpha: 0.2),
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.fitness_center, size: 48, color: Colors.grey.shade300),
+            const SizedBox(height: 12),
+            const Text(
+              'No workouts logged yet',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF023E8A),
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Tap here to log your first session',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Single recent workout row ─────────────────────────────
+class _RecentWorkoutTile extends StatelessWidget {
+  final WorkoutEntry workout;
+  const _RecentWorkoutTile({required this.workout});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0077B6).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              workout.discipline.icon,
+              color: const Color(0xFF0077B6),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  workout.discipline.label,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF023E8A),
+                  ),
+                ),
+                Text(
+                  '${workout.distanceDisplay} · ${workout.durationMinutes} min',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '${workout.date.day}/${workout.date.month}',
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Quick action card ─────────────────────────────────────
 class _QuickActionCard extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -301,10 +473,10 @@ class _QuickActionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
@@ -317,19 +489,19 @@ class _QuickActionCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 42,
+              height: 42,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color, size: 22),
+              child: Icon(icon, color: color, size: 20),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               label,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF023E8A),
               ),
@@ -339,71 +511,6 @@ class _QuickActionCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// DISCIPLINE CARD
-
-class _DisciplineCard extends StatelessWidget {
-  final String image;
-  final String label;
-
-  const _DisciplineCard({required this.image, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            image,
-            width: 44,
-            height: 44,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.image_not_supported,
-                  color: Colors.grey,
-                  size: 20,
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF023E8A),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }

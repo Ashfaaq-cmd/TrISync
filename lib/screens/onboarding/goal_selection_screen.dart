@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/user_profile.dart';
+import '../../services/notification_service.dart';
 
 class GoalSelectionScreen extends StatefulWidget {
   const GoalSelectionScreen({super.key});
@@ -43,13 +44,9 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
     },
   ];
 
-  void _selectGoal(String goal) {
-    setState(() {
-      _selectedGoal = goal;
-    });
-  }
+  void _selectGoal(String goal) => setState(() => _selectedGoal = goal);
 
-  void _finish() {
+  Future<void> _finish() async {
     if (_selectedGoal == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -59,13 +56,22 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
       );
       return;
     }
+
     final profile = Provider.of<UserProfile>(context, listen: false);
-    profile.saveProfile(
+    await profile.saveProfile(
       name: profile.name,
       password: profile.password,
       fitnessLevel: profile.fitnessLevel,
       raceGoal: _selectedGoal!,
     );
+
+    // Schedule daily 7 AM motivational reminder now that onboarding is done
+    await NotificationService.instance.scheduleDailyReminder(
+      hour: 7,
+      minute: 0,
+    );
+
+    if (!mounted) return;
     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 
@@ -73,11 +79,9 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // Use a Column with a scrollable middle section and a pinned button
       body: SafeArea(
         child: Column(
           children: [
-            // Scrollable content
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -85,7 +89,6 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 40),
-                    // Back button
                     IconButton(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(
@@ -114,7 +117,6 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                       style: TextStyle(color: Colors.grey, fontSize: 16),
                     ),
                     const SizedBox(height: 24),
-                    // Goal cards
                     ..._goals.map((item) {
                       final isSelected = _selectedGoal == item['goal'];
                       return GestureDetector(
@@ -125,7 +127,9 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? item['color'].withValues(alpha: 0.1)
+                                ? (item['color'] as Color).withValues(
+                                    alpha: 0.1,
+                                  )
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
@@ -143,7 +147,9 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? item['color']
-                                      : item['color'].withValues(alpha: 0.1),
+                                      : (item['color'] as Color).withValues(
+                                          alpha: 0.1,
+                                        ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
@@ -201,8 +207,6 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                 ),
               ),
             ),
-
-            // Pinned finish button
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
               child: SizedBox(
