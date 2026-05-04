@@ -153,6 +153,12 @@ class _HomeDashboard extends StatelessWidget {
               // ── Motivate with a daily quote
               const _DailyMotivationCard(),
 
+              const SizedBox(height: 16),
+              const _GamificationCard(),
+
+              const SizedBox(height: 16),
+              const _DailyChallengeCard(),
+
               const SizedBox(height: 20),
 
               // ── Profile card
@@ -353,6 +359,214 @@ class _HomeDashboard extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _GamificationCard extends StatelessWidget {
+  const _GamificationCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final badges = context.watch<BadgeProvider>();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF48CAE4).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.emoji_events,
+                  color: Color(0xFF48CAE4),
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Training Level',
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Level ${badges.level}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF023E8A),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            '${badges.xp} XP • ${badges.xpForNextLevel} XP to Level ${badges.level + 1}',
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: LinearProgressIndicator(
+              value: badges.levelProgress,
+              minHeight: 10,
+              backgroundColor: const Color(0xFFF1F5F9),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFF48CAE4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            badges.levelProgress >= 1.0
+                ? 'Ready for the next level!'
+                : 'Keep training to reach the next milestone.',
+            style: const TextStyle(fontSize: 13, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DailyChallengeCard extends StatelessWidget {
+  const _DailyChallengeCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final badges = context.watch<BadgeProvider>();
+    final challenge = badges.todayChallenge;
+
+    if (challenge == null) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: challenge.color.withOpacity(0.3), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: challenge.color.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(challenge.icon, color: challenge.color, size: 28),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Today\'s Challenge',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      challenge.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF023E8A),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (challenge.completed)
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                    size: 24,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            challenge.description,
+            style: const TextStyle(fontSize: 13, color: Colors.grey),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: LinearProgressIndicator(
+                    value: (challenge.progress / challenge.targetValue).clamp(
+                      0.0,
+                      1.0,
+                    ),
+                    minHeight: 12,
+                    backgroundColor: const Color(0xFFF1F5F9),
+                    valueColor: AlwaysStoppedAnimation<Color>(challenge.color),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '${challenge.progress}/${challenge.targetValue}${challenge.unit}',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF023E8A),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _DailyMotivationCard extends StatefulWidget {

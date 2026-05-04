@@ -70,6 +70,7 @@ class _LogWorkoutScreenState extends State<LogWorkoutScreen> {
     final badgeProvider = context.read<BadgeProvider>();
 
     await workoutProvider.addWorkout(workout);
+    await badgeProvider.addXpFromWorkout(workout);
     await badgeProvider.evaluate(workoutProvider.workouts);
 
     if (!mounted) return;
@@ -90,6 +91,12 @@ class _LogWorkoutScreenState extends State<LogWorkoutScreen> {
       );
 
       _showBadgeDialog(earned);
+    }
+
+    if (badgeProvider.newlyLevelUp != null) {
+      final level = badgeProvider.newlyLevelUp!;
+      badgeProvider.clearNewlyLevelUp();
+      await _showLevelUpDialog(level);
     }
 
     setState(() {
@@ -181,6 +188,71 @@ class _LogWorkoutScreenState extends State<LogWorkoutScreen> {
                 ),
                 child: const Text(
                   'Awesome!',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showLevelUpDialog(int level) async {
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 180,
+              height: 180,
+              child: Lottie.asset(
+                'assets/animations/level_up.json',
+                repeat: false,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Lottie.asset(
+                    'assets/animations/Confetti.json',
+                    repeat: false,
+                    fit: BoxFit.contain,
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Level Up!',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF023E8A),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'You reached Level $level.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 15, color: Colors.grey),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0077B6),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Keep Going',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),

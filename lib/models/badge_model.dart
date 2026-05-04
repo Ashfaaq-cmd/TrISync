@@ -3,6 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'workout.dart';
 
+class DailyChallenge {
+  final String id;
+  final String title;
+  final String description;
+  final int targetValue;
+  final String unit;
+  final Discipline? discipline;
+  final IconData icon;
+  final Color color;
+  bool completed;
+  int progress;
+
+  DailyChallenge({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.targetValue,
+    required this.unit,
+    this.discipline,
+    required this.icon,
+    required this.color,
+    this.completed = false,
+    this.progress = 0,
+  });
+}
+
 class AppBadge {
   final String id;
   final String title;
@@ -33,8 +59,26 @@ class AppBadge {
 
 class BadgeProvider extends ChangeNotifier {
   AppBadge? _newlyEarned;
+  int _xp = 0;
+  int _level = 1;
+  int? _newlyLevelUp;
+  DailyChallenge? _todayChallenge;
+
   AppBadge? get newlyEarned => _newlyEarned;
+  int get xp => _xp;
+  int get level => _level;
+  int? get newlyLevelUp => _newlyLevelUp;
+  DailyChallenge? get todayChallenge => _todayChallenge;
+
+  double get levelProgress {
+    final nextXp = xpForNextLevel;
+    return nextXp == 0 ? 0 : (xp / nextXp).clamp(0.0, 1.0);
+  }
+
+  int get xpForNextLevel => _xpThresholdForLevel(_level + 1);
+
   void clearNewlyEarned() => _newlyEarned = null;
+  void clearNewlyLevelUp() => _newlyLevelUp = null;
 
   final List<AppBadge> _badges = [
     // Swim
@@ -159,7 +203,54 @@ class BadgeProvider extends ChangeNotifier {
         badge.earnedDate = ds != null ? DateTime.parse(ds) : null;
       }
     }
+
+    _xp = prefs.getInt('badgeXp') ?? 0;
+    _level = prefs.getInt('badgeLevel') ?? 1;
+
+    _initializeDailyChallenge();
     notifyListeners();
+  }
+
+  void _initializeDailyChallenge() {
+    _todayChallenge = _generateTodayChallenge();
+  }
+
+  DailyChallenge _generateTodayChallenge() {
+    final today = DateTime.now().day % 3;
+    if (today == 0) {
+      return DailyChallenge(
+        id: 'daily_swim',
+        title: 'Swim Challenge',
+        description: 'Swim 500m to complete today\'s challenge',
+        targetValue: 500,
+        unit: 'm',
+        discipline: Discipline.swim,
+        icon: Icons.pool,
+        color: const Color(0xFF48CAE4),
+      );
+    } else if (today == 1) {
+      return DailyChallenge(
+        id: 'daily_bike',
+        title: 'Bike Challenge',
+        description: 'Ride 10 km to complete today\'s challenge',
+        targetValue: 10,
+        unit: 'km',
+        discipline: Discipline.bike,
+        icon: Icons.directions_bike,
+        color: const Color(0xFF0096C7),
+      );
+    } else {
+      return DailyChallenge(
+        id: 'daily_run',
+        title: 'Run Challenge',
+        description: 'Run 3 km to complete today\'s challenge',
+        targetValue: 3,
+        unit: 'km',
+        discipline: Discipline.run,
+        icon: Icons.directions_run,
+        color: const Color(0xFF023E8A),
+      );
+    }
   }
 
   Future<void> _persist() async {
@@ -168,6 +259,8 @@ class BadgeProvider extends ChangeNotifier {
       'badges',
       _badges.map((b) => jsonEncode(b.toJson())).toList(),
     );
+    await prefs.setInt('badgeXp', _xp);
+    await prefs.setInt('badgeLevel', _level);
   }
 
   Future<void> evaluate(List<WorkoutEntry> workouts) async {
@@ -239,4 +332,50 @@ class BadgeProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> addXpFromWorkout(WorkoutEntry workout) async {
+    final earnedXp = _xpForWorkout(workout);
+    _xp += earnedXp;
+
+    bool leveled = false;
+    while (_xp >= xpForNextLevel) {
+      _level += 1;
+      _newlyLevelUp = _level;
+      leveled = true;
+    }
+
+    // Update daily challenge progress
+    if (_todayChallenge != null && !_todayChallenge!.completed) {
+      if (_todayChallenge!.discipline == workout.discipline) {
+        final addedProgress = workout.discipline == Discipline.swim
+            ? workout.distance.toInt()
+            : workout.distance.toInt();
+        _todayChallenge!.progress += addedProgress;
+        if (_todayChallenge!.progress >= _todayChallenge!.targetValue) {
+          _todayChallenge!.completed = true;
+          _xp += 50; // bonus XP for completing daily challenge
+        }
+      }
+    }
+
+    if (earnedXp > 0 || leveled) {
+      await _persist();
+      notifyListeners();
+    }
+  }
+
+  int _xpForWorkout(WorkoutEntry workout) {
+    final durationBonus = (workout.durationMinutes / 10).round() * 5;
+    final distanceBonus = workout.discipline == Discipline.swim
+        ? (workout.distance / 100).round() * 3
+        : workout.distance.round() * 2;
+    final disciplineBonus = workout.discipline == Discipline.swim
+        ? 5
+        : workout.discipline == Discipline.bike
+        ? 8
+        : 6;
+    return 20 + durationBonus + distanceBonus + disciplineBonus;
+  }
+
+  int _xpThresholdForLevel(int level) => 100 + (level - 1) * 50;
 }
